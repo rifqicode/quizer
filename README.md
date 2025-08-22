@@ -2,20 +2,6 @@
 
 A comprehensive quiz application backend built with Go, Gin framework, and PostgreSQL. The application provides a REST API for managing quiz topics, conducting quiz sessions, and tracking user progress.
 
-## 📖 Table of Contents
-
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Installation & Setup](#installation--setup)
-- [Configuration](#configuration)
-- [Database Migrations](#database-migrations)
-- [Running the Application](#running-the-application)
-- [API Documentation](#api-documentation)
-- [Usage Examples](#usage-examples)
-- [Development](#development)
-- [Contributing](#contributing)
-
 ## ✨ Features
 
 - **User Authentication**: Registration, login, and JWT-based authentication
@@ -201,21 +187,6 @@ make migrate-create
 migrate create -ext sql -dir migrations -seq your_migration_name
 ```
 
-### Migration Files Structure
-
-The project includes the following migration files:
-- `20250821141439_create_users_table.*` - User accounts and authentication
-- `20250821141440_create_access_tokens_table.*` - JWT token management
-- `20250822100001_create_topics_table.*` - Quiz topics/categories
-- `20250822100002_create_questions_table.*` - Quiz questions
-- `20250822100003_create_question_options_table.*` - Multiple choice options
-- `20250822100004_create_quiz_sessions_table.*` - Quiz session tracking
-- `20250822100005_create_quiz_answers_table.*` - User answers
-- `20250822100006_create_user_question_history_table.*` - Answer history
-- `20250822100007_seed_topics_data.*` - Default topic data
-- `20250822100008_add_deleted_at_columns.*` - Soft delete support
-- `20250822100009_seed_database_questions.*` - Sample quiz questions
-
 ## 🏃‍♂️ Running the Application
 
 ### Development Mode
@@ -229,19 +200,6 @@ make dev
 
 # Or using the development command
 make run
-```
-
-### Production Build
-
-```bash
-# Build the application
-make build
-
-# Run the built binary
-make run
-
-# Or run directly
-./bin/quizer
 ```
 
 The application will start on `http://localhost:8080` (or the port specified in your `.env` file).
@@ -296,81 +254,6 @@ http://localhost:8080/api/v1
 | GET | `/health` | Basic health check |
 | GET | `/health/db` | Database connectivity check |
 
-## 🔧 Usage Examples
-
-### 1. User Registration
-
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "password123"
-  }'
-```
-
-### 2. User Login
-
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "john@example.com",
-    "password": "password123"
-  }'
-```
-
-### 3. Start Quiz Session
-
-```bash
-curl -X POST http://localhost:8080/api/v1/quiz/sessions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "topic_id": 1,
-    "total_questions": 10,
-    "difficulty": "easy"
-  }'
-```
-
-### 4. Submit Answer
-
-```bash
-curl -X POST http://localhost:8080/api/v1/quiz/sessions/1/answer \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "question_id": 1,
-    "selected_option_id": 2
-  }'
-```
-
-## 🛠️ Development
-
-### Available Make Commands
-
-```bash
-make install         # Install dependencies
-make dev            # Run in development mode
-make build          # Build the application
-make run            # Run the built binary
-make test           # Run tests
-make test-coverage  # Run tests with coverage
-make clean          # Clean build artifacts
-make fmt            # Format code
-make lint           # Lint code
-
-# Migration commands
-make migrate-create # Create a new migration (interactive)
-make migrate-up     # Apply all pending migrations
-make migrate-down   # Rollback the last migration
-
-# Docker commands
-make docker-build   # Build Docker image
-make docker-run     # Run Docker container
-```
-
 ### Code Structure Guidelines
 
 - **handlers/**: HTTP request handlers, responsible for request/response processing
@@ -378,38 +261,6 @@ make docker-run     # Run Docker container
 - **models/**: Data structures and database models
 - **middleware/**: HTTP middleware for cross-cutting concerns
 - **utils/**: Shared utility functions
-
-### Environment Variables
-
-The application supports the following environment variables:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DB_HOST` | Database host | localhost |
-| `DB_PORT` | Database port | 5432 |
-| `DB_USER` | Database username | - |
-| `DB_PASSWORD` | Database password | - |
-| `DB_NAME` | Database name | - |
-| `DATABASE_URL` | Complete database URL for migrations | - |
-| `SERVER_PORT` | Server port | 8080 |
-| `SERVER_MODE` | Gin mode (debug/release) | debug |
-| `JWT_SECRET` | JWT signing secret | - |
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Support
-
-For support, email your-email@example.com or create an issue in the GitHub repository.
 
 ---
 
