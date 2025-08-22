@@ -184,7 +184,7 @@ func (h *AuthHandler) Me(c *gin.Context) {
 	}()
 
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		utils.ErrorResponse(c, http.StatusUnauthorized, "User not authenticated")
 		return

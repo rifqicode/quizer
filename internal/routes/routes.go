@@ -22,6 +22,17 @@ func SetupRoutes() *gin.Engine {
 	router.Use(middleware.ErrorHandlerMiddleware())
 	router.Use(middleware.TimeoutMiddleware(30 * time.Second)) // 30 second timeout
 
+	// Initialize services once
+	userService := services.NewUserService()
+	tokenService := services.NewTokenService()
+	authService := services.NewAuthService(userService, tokenService)
+	quizService := services.NewQuizService()
+
+	// Initialize handlers once
+	authHandler := handlers.NewAuthHandler(authService, userService)
+	userHandler := handlers.NewUserHandler(userService)
+	quizHandler := handlers.NewQuizHandler(quizService)
+
 	// Health check endpoints
 	router.GET("/health", healthCheck)
 	router.GET("/health/db", databaseHealthCheck)
@@ -29,8 +40,9 @@ func SetupRoutes() *gin.Engine {
 	// API v1 routes
 	v1 := router.Group("/api/v1")
 	{
-		setupAuthRoutes(v1)
-		setupUserRoutes(v1)
+		setupAuthRoutes(v1, authHandler, authService)
+		setupUserRoutes(v1, userHandler, authService)
+		setupQuizRoutes(v1, quizHandler, authService)
 	}
 
 	return router
@@ -63,12 +75,7 @@ func databaseHealthCheck(c *gin.Context) {
 	}
 }
 
-func setupAuthRoutes(rg *gin.RouterGroup) {
-	userService := services.NewUserService()
-	tokenService := services.NewTokenService()
-	authService := services.NewAuthService(userService, tokenService)
-	authHandler := handlers.NewAuthHandler(authService, userService)
-
+func setupAuthRoutes(rg *gin.RouterGroup, authHandler *handlers.AuthHandler, authService services.AuthService) {
 	auth := rg.Group("/auth")
 	{
 		auth.POST("/register", authHandler.Register)
@@ -81,20 +88,42 @@ func setupAuthRoutes(rg *gin.RouterGroup) {
 	}
 }
 
-func setupUserRoutes(rg *gin.RouterGroup) {
-	userService := services.NewUserService()
-	tokenService := services.NewTokenService()
-	authService := services.NewAuthService(userService, tokenService)
-	userHandler := handlers.NewUserHandler(userService)
-
+func setupUserRoutes(rg *gin.RouterGroup, userHandler *handlers.UserHandler, authService services.AuthService) {
 	users := rg.Group("/users")
-	// Apply authentication middleware to all user routes
-	users.Use(middleware.AuthMiddleware(authService))
+	users.Use(middleware.AuthMiddleware(authService)) // auth applied to all user routes
 	{
 		users.POST("", userHandler.CreateUser)
 		users.GET("", userHandler.GetAllUsers)
 		users.GET("/:id", userHandler.GetUser)
 		users.PUT("/:id", userHandler.UpdateUser)
 		users.DELETE("/:id", userHandler.DeleteUser)
+	}
+}
+
+func setupQuizRoutes(rg *gin.RouterGroup, quizHandler *handlers.QuizHandler, authService services.AuthService) {
+	quiz := rg.Group("/quiz")
+	quiz.Use(middleware.AuthMiddleware(authService)) // auth applied to all quiz routes
+	{
+		// Topic routes
+		quiz.GET("/topics", quizHandler.GetActiveTopics)
+		quiz.GET("/topics/:id", quizHandler.GetTopicByID)
+		quiz.GET("/topics/:id/stats", quizHandler.GetTopicQuestionStats)
+
+		// Quiz session routes
+		quiz.POST("/sessions", quizHandler.StartQuizSession)
+		quiz.GET("/sessions/:id", quizHandler.GetQuizSession)
+		quiz.PUT("/sessions/:id/abandon", quizHandler.AbandonQuizSession)
+
+		// Question routes
+		quiz.GET("/sessions/:id/next-question", quizHandler.GetNextQuestion)
+		quiz.POST("/sessions/:id/answer", quizHandler.SubmitAnswer)
+
+		// Results routes
+		quiz.POST("/sessions/:id/complete", quizHandler.CompleteQuizSession)
+		quiz.GET("/sessions/:id/results", quizHandler.GetQuizResults)
+
+		// User history and stats routes
+		quiz.GET("/my-sessions", quizHandler.GetUserQuizHistory)
+		quiz.GET("/my-stats", quizHandler.GetUserQuizStats)
 	}
 }

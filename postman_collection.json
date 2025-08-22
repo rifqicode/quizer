@@ -765,6 +765,476 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Quiz Management",
+			"item": [
+				{
+					"name": "Topic Management",
+					"item": [
+						{
+							"name": "Get Active Topics",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/topics",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"topics"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Topic by ID",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/topics/{{topic_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"topics",
+										"{{topic_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Topic Question Statistics",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/topics/{{topic_id}}/stats",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"topics",
+										"{{topic_id}}",
+										"stats"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Quiz Sessions",
+					"item": [
+						{
+							"name": "Start Quiz Session",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"pm.test(\"Response has session ID\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data).to.have.property('id');",
+											"    pm.globals.set('session_id', jsonData.data.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"topic_id\": {{topic_id}},\n  \"difficulty\": \"{{difficulty}}\",\n  \"total_questions\": {{total_questions}}\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/sessions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"sessions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Quiz Session Details",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/sessions/{{session_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"sessions",
+										"{{session_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Abandon Quiz Session",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/sessions/{{session_id}}/abandon",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"sessions",
+										"{{session_id}}",
+										"abandon"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Questions & Answers",
+					"item": [
+						{
+							"name": "Get Next Question",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response has question data\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data).to.have.property('id');",
+											"    pm.expect(jsonData.data).to.have.property('question_text');",
+											"    pm.expect(jsonData.data).to.have.property('options');",
+											"    pm.globals.set('question_id', jsonData.data.id);",
+											"    if (jsonData.data.options && jsonData.data.options.length > 0) {",
+											"        pm.globals.set('option_id', jsonData.data.options[0].id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/sessions/{{session_id}}/next-question",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"sessions",
+										"{{session_id}}",
+										"next-question"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Submit Answer",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"question_id\": {{question_id}},\n  \"selected_option_id\": {{option_id}},\n  \"time_spent_seconds\": 30\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/sessions/{{session_id}}/answer",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"sessions",
+										"{{session_id}}",
+										"answer"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Results & Statistics",
+					"item": [
+						{
+							"name": "Complete Quiz Session",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/sessions/{{session_id}}/complete",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"sessions",
+										"{{session_id}}",
+										"complete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Quiz Results",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/sessions/{{session_id}}/results",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"sessions",
+										"{{session_id}}",
+										"results"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User Quiz History",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/my-sessions?limit=10&offset=0",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"my-sessions"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "offset",
+											"value": "0"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User Quiz Statistics",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/quiz/my-stats",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"quiz",
+										"my-stats"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
 		}
 	],
 	"event": [
@@ -816,6 +1286,36 @@
 		{
 			"key": "user_id",
 			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "topic_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "session_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "question_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "option_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "difficulty",
+			"value": "medium",
+			"type": "string"
+		},
+		{
+			"key": "total_questions",
+			"value": "10",
 			"type": "string"
 		}
 	]
